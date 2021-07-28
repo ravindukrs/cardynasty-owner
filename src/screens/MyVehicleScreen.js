@@ -50,9 +50,8 @@ export default function MyVehicleScreen({ navigation }) {
 
                 {myVehicles ? (
                    myVehicles.map(vehicle => {
-                       console.log(myVehicles)
                        return(
-                        <MyCarComponent key={vehicle.vin} vehicle={{ make: vehicle.make, model: vehicle.model }} navigation={navigation} />
+                        <MyCarComponent key={vehicle.vin} vehicle={{ make: vehicle.make, model: vehicle.model, regNumber: vehicle.regNumber }} navigation={navigation} />
                        )
                     })
                     

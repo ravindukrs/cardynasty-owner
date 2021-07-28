@@ -27,17 +27,31 @@ export default function NotificationScreen({navigation}) {
     const { user, logout } = useContext(AuthContext);
     const [pendingServices, setPendingServices] = useState(null)
     const [serviceList, setServiceList] = useState(null)
+    const [myVehicles, setMyVehicles] = useState(null)
 
     useEffect(() => {
         (async () => {
             try {
-                await Firebase.getPendingServices(user.uid, "KA2134", setPendingServices);
+                await Firebase.getMyVehiclesRegistrations(user.uid, setMyVehicles);
             } catch (error) {
                 console.log("Error Occured")
                 console.log(error);
             }
         })()
     }, [user])
+
+    useEffect(() => {
+        (async () => {
+            try {
+                myVehicles?
+                await Firebase.getPendingServices(user.uid, myVehicles, setPendingServices)
+                :setPendingServices(null);
+            } catch (error) {
+                console.log("Error Occured")
+                console.log(error);
+            }
+        })()
+    }, [user, myVehicles])
 
 
     useEffect(() => {
@@ -52,14 +66,14 @@ export default function NotificationScreen({navigation}) {
         })()
     }, [user])
 
-    const onDeclinePress = async (entryKey) => {
-        await Firebase.updateNotificationStatus("KA2134", entryKey, {approved: "declined"})
+    const onDeclinePress = async (entryKey, regNumber) => {
+        await Firebase.updateNotificationStatus(regNumber, entryKey, {approved: "declined"})
         console.log("Declined")
 
     }
 
-    const onAcceptPress = async (entryKey) => {
-        await Firebase.updateNotificationStatus("KA2134", entryKey, {approved: "accepted"})
+    const onAcceptPress = async (entryKey, regNumber) => {
+        await Firebase.updateNotificationStatus(regNumber, entryKey, {approved: "accepted"})
         console.log("Approved")
     }
 
@@ -70,11 +84,18 @@ export default function NotificationScreen({navigation}) {
                 <Text style={{ textAlign: 'center', fontSize: 18 }}>Pending Approvals</Text>
                 {pendingServices && serviceList ? (
                  pendingServices.map(service => {
-                     console.log("Service ID: ", service.id)
+                    console.log("Service ID: ", service.id)
                     let workDone = ""
-                    service.services.forEach((index) => {
-                        workDone += serviceList[Number(index)+1];
-                    })
+                    console.log("Services Listed: ",service.services)
+                    if(service.services){
+                        service.services.forEach((index) => {
+                            workDone += serviceList[Number(index)+1];
+                        })
+                    }else{
+                        workDone = "Updating"
+                    }
+                    
+                
 
                     return(
                      <NotificationComponent 
@@ -84,7 +105,8 @@ export default function NotificationScreen({navigation}) {
                                 type:service.description, 
                                 description:`Service Date ${service.entryDate}`, 
                                 workdone: `Work Done: ${workDone}`,
-                                serviceId: service.id
+                                serviceId: service.id,
+                                regNumber: service.regNumber
                             }
                         }     
                         navigation={navigation}

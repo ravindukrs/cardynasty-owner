@@ -17,18 +17,19 @@ export default function MyCarComponent(props) {
                 title = {props.vehicle.make}
                 subtitle= {props.vehicle.model}
             />
-            <CardContent text="No upcomming reminders" />
+            {/* <CardContent text="No upcomming reminders" /> */}
             <CardAction
                 separator={true}
                 inColumn={false}>
-                <CardButton
+                {/* <CardButton
                     onPress={() => { props.navigation.navigate("Add Service")}}
                     title="Add Service"
                     color="#FEB557"
-                />
+                /> */}
                 <CardButton
                     onPress={() => { }}
                     title="View"
+                    onPress={() => { props.navigation.navigate("View History", {regNumber: props.vehicle.regNumber})}}
                     color="#FEB557"
                 />
                 <CardButton

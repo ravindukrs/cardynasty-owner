@@ -10,6 +10,7 @@ import AddVehicleScreen from '../screens/AddVehicleScreen';
 import ReminderScreen from '../screens/ReminderScreen';
 import HistoryScreen from '../screens/HistoryScreen';
 import NotificationScreen from '../screens/NotificationScreen';
+import RepairTimelineScreen from '../screens/RepairTimelineScreen';
 
 import {Icon} from 'react-native-elements'
 
@@ -112,6 +113,10 @@ export function VehicleOwnershipStack() {
                 {...TransitionPresets.SlideFromRightIOS,}
             }/>
             <Stack.Screen name="Add Service" component={ServiceScreen} 
+            options={
+                {...TransitionPresets.SlideFromRightIOS,}
+            }/>
+            <Stack.Screen name="View History" component={RepairTimelineScreen} 
             options={
                 {...TransitionPresets.SlideFromRightIOS,}
             }/>

@@ -1,25 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, Alert, Dimensions } from 'react-native';
-import CustomDatePicker from '../components/CustomDatePicker';
 import { AuthContext } from '../navigation/AuthProvider';
 import Firebase from '../utils/Firestore/Firebase';
 import { Input, Button, ListItem, Icon } from 'react-native-elements';
-// import Icon from 'react-native-vector-icons/FontAwesome';
-import { windowHeight, windowWidth } from '../utils/Dimensions';
-import ConfirmationInput from '../components/ConfirmationInput';
-import OdometerInput from '../components/OdometerInput';
-import ServiceList from '../components/ServiceList';
-import { LineChartComponent } from '../components/ChartComponent';
-import { PieChartComponent } from '../components/ChartComponent'
-import { ProgressChartComponent } from '../components/ChartComponent'
-
-import moment from 'moment';
-import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 'react-native-cards';
-import BalanceComponent from '../components/BalanceComponent';
-import ReminderComponent from '../components/ReminderComponent'
-import AddVehicleScreen from '../screens/AddVehicleScreen'
 import VehicleInfoBlackBar from '../components/VehicleInfoBlackBar';
-
+import moment from 'moment';
 
 
 
@@ -30,11 +15,53 @@ export default function HistoryScreen({ navigation }) {
     const [approvedServices, setApprovedServices] = useState(null)
     const [serviceList, setServiceList] = useState(null)
     const [history, setHistory] = useState(null)
+    const [myVehicles, setMyVehicles] = useState(null)
+    const [looper, setLooper] = useState(0)
+    const [vehicleData, setVehicleData] = useState(null)
+    const [lastService, setLastService] = useState(null)
+    const [list, setList] = useState(null)
+
+
+    const handleNext = () => {
+        console.log("Handle Next Pressed ", looper)
+        if (myVehicles) {
+            let currentLoop = looper;
+            if (currentLoop == (myVehicles.length - 1)) {
+                currentLoop = 0;
+            } else {
+                currentLoop = currentLoop + 1
+            }
+            setLooper(currentLoop)
+            console.log("currentLoop ", currentLoop)
+        }
+    }
+
+    useEffect(() => {
+        (async () => {
+            if(myVehicles) {
+                try {
+                    let response = await fetch(
+                      `https://us-central1-cardynasty-rs.cloudfunctions.net/app/vehicle?reg=${myVehicles[looper]}`
+                    );
+                    let json = await response.json();
+                    console.log("Data from Fetch: ", json)
+                    if(json.length == 0){
+                        setVehicleData(null)
+                    }else{
+                        setVehicleData(json)
+                    }
+                    console.log(json);
+                  } catch (error) {
+                    console.error(error);
+                  }
+            }
+        })()
+    }, [user, myVehicles, looper])
 
     useEffect(() => {
         (async () => {
             try {
-                await Firebase.getApprovedServices(user.uid, "KA2134", setApprovedServices);
+                await Firebase.getMyVehiclesRegistrations(user.uid, setMyVehicles);
             } catch (error) {
                 console.log("Error Occured")
                 console.log(error);
@@ -45,9 +72,24 @@ export default function HistoryScreen({ navigation }) {
     useEffect(() => {
         (async () => {
             try {
+                if (myVehicles) {
+                    console.log("Current Reg Number: ", myVehicles[looper])
+                    await Firebase.getApprovedServices(user.uid, myVehicles[looper], setApprovedServices);
+                }
+            } catch (error) {
+                console.log("Error Occured")
+                console.log(error);
+            }
+        })()
+    }, [user, myVehicles, looper])
+
+    useEffect(() => {
+        (async () => {
+            try {
                 let serviceTypes = await Firebase.getServiceTypes();
                 var result = Object.keys(serviceTypes).map((key) => serviceTypes[key]);
                 setServiceList(result)
+                console.log("service list: ", result)
             } catch (error) {
                 console.log(error);
             }
@@ -56,16 +98,19 @@ export default function HistoryScreen({ navigation }) {
 
     useEffect(() => {
         let historyList = []
-        if (approvedServices && serviceList) {
+        if (approvedServices && serviceList && approvedServices.length != 0) {
             approvedServices.forEach((service) => {
-                let workDone = ""
-                service.services.forEach((index) => {
-                    workDone += serviceList[Number(index) + 1] += " | ";
-                })
+                let workDone = []
+                if (service.services) {
+                    service.services.forEach((index) => {
+                        // workDone += serviceList[Number(index) + 1] += " | ";
+                        workDone.push(serviceList[Number(index) + 1])
+                    })
+                }
 
                 historyList.push(
                     {
-                        title: workDone,
+                        title: workDone.toString(),
                         subtitle: `Serviced on ${service.entryDate} at Milage ${service.odometer} KM`,
                         icon: 'checkcircleo',
                         icontype: 'antdesign'
@@ -73,54 +118,95 @@ export default function HistoryScreen({ navigation }) {
                 )
                 setHistory(historyList)
             })
+        } else {
+            console.log("History Set to Null")
+            setHistory(null)
         }
     }, [approvedServices, serviceList])
 
     useEffect(() => {
-        console.log("Approved Services are: ", approvedServices)
-    }, [approvedServices, serviceList])
+        (async () => {
+            try {
+                if (myVehicles && serviceList && approvedServices) {
+                   let lastServiceArray = []
+                   let serviceNumbers = ["10", "3", "6", "12", "2"]
+                   serviceNumbers.forEach((number) => {
+                    var change = approvedServices.filter((service) => {
+                        return service.services.includes(number)
+                    })
+                    if(change.length == 0){
+                        lastServiceArray.push("No Record")
+                    }else{
+                        lastServiceArray.push(moment(change[0].serviceDate).format("YYYY-MM-DD"))
+                    }
+                   })
+                   setLastService(lastServiceArray)
 
-    const list = [
-        {
-            title: 'Changed Oil',
-            subtitle: 'Nov / 2020',
-            icon: 'oil-can',
-            icontype: 'font-awesome-5'
-        },
-        {
-            title: 'Body Wash',
-            subtitle: 'Aug / 2020',
-            icon: 'car-wash',
-            icontype: 'material-community'
-        },
-        {
-            title: 'Wheel Alignment',
-            subtitle: 'July / 2020',
-            icon: 'steering',
-            icontype: 'material-community'
-        },
-        {
-            title: 'Fuel Filter Change',
-            subtitle: 'June / 2020',
-            icon: 'fuel',
-            icontype: 'material-community'
-        },
-        {
-            title: 'Air Filter',
-            subtitle: 'May / 2020',
-            icon: 'air',
-            icontype: 'entypo'
-        },
-    ]
+                }
+            } catch (error) {
+                console.log("Error Occured")
+                console.log(error);
+            }
+        })()
+    }, [user, myVehicles, looper, approvedServices])
+
+    useEffect(() => {
+        (async () => {
+            try {
+                if (lastService) {
+                    setList(
+                        [
+                            {
+                                title: 'Changed Oil',
+                                subtitle: lastService[0],
+                                icon: 'oil-can',
+                                icontype: 'font-awesome-5'
+                            },
+                            {
+                                title: 'Battery Check',
+                                subtitle: lastService[1],
+                                icon: 'car-wash',
+                                icontype: 'material-community'
+                            },
+                            {
+                                title: 'Break Work',
+                                subtitle: lastService[2],
+                                icon: 'steering',
+                                icontype: 'material-community'
+                            },
+                            {
+                                title: 'Fuel Filter Change',
+                                subtitle: lastService[3],
+                                icon: 'fuel',
+                                icontype: 'material-community'
+                            },
+                            {
+                                title: 'Air Filter',
+                                subtitle: lastService[4],
+                                icon: 'air',
+                                icontype: 'entypo'
+                            },
+                        ]
+                    )
+
+                }
+            } catch (error) {
+                console.log("Error Occured")
+                console.log(error);
+            }
+        })()
+    }, [lastService])
 
 
     return (
         <View style={styles.container}>
             <ScrollView>
                 <Text style={{ textAlign: 'center', fontSize: 18 }}>Vehicle History</Text>
-                <VehicleInfoBlackBar
+                {vehicleData ? 
+                <VehicleInfoBlackBar vehicleData = {vehicleData} approvedServices = {approvedServices}
                     style={styles.vehicleInfoBlackBar}
-                />
+                /> : <Text>Vehicle Data Not Available</Text>
+                }
                 <Button
                     icon={
                         <Icon
@@ -130,13 +216,15 @@ export default function HistoryScreen({ navigation }) {
                         />
                     }
                     title="Next Vehicle"
-                // onPress={()=>navigation.navigate('AddVehicle')}
+                    // onPress={()=>navigation.navigate('AddVehicle')}
+                    onPress={() => handleNext()}
+
 
                 />
 
                 <View style={{ marginTop: 20 }}>
                     {
-                        list.map((item, i) => (
+                        list && list.map((item, i) => (
                             <ListItem key={i} bottomDivider>
                                 <Icon name={item.icon} type={item.icontype} />
                                 <ListItem.Content>
@@ -164,7 +252,12 @@ export default function HistoryScreen({ navigation }) {
                             ))
                         }
                     </View>
-                ) : null}
+                ) :
+                    <View style={{ marginTop: 20 }}>
+                        <Text>No History available for this vehicle</Text>
+                    </View>
+
+                }
 
             </ScrollView>
         </View>

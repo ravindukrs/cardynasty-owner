@@ -14,13 +14,13 @@ function VehicleInfoBlackBar(props) {
       </View>
       <View style={styles.odometerRow}>
         <Text style={styles.odometer}>ODOMETER</Text>
-        <Text style={styles.ytdCost}>YTD COST</Text>
+        <Text style={styles.ytdCost}>COLOR</Text>
       </View>
       <View style={styles.vehicleIdVin1Row}>
-        <Text style={styles.vehicleIdVin1}>7777-8888-9999</Text>
+        <Text style={styles.vehicleIdVin1}>{props.vehicleData[0].chassis}</Text>
         <View style={styles.tx1234Stack}>
-          <Text style={styles.tx1234}>TX-1234</Text>
-          <Text style={styles.tx12342}>TX-1234</Text>
+          <Text style={styles.tx1234}>{props.vehicleData[0].id}</Text>
+          <Text style={styles.tx12342}>{props.vehicleData[0].id}</Text>
         </View>
       </View>
       <View style={styles.hux123Row}>
@@ -28,8 +28,11 @@ function VehicleInfoBlackBar(props) {
         <Text style={styles.tx12343}>255/45/R17</Text>
       </View>
       <View style={styles.hux124Row}>
-        <Text style={styles.hux124}>10000KM</Text>
-        <Text style={styles.lkr15600}>LKR 15600</Text>
+        {props.approvedServices && props.approvedServices.length != 0 ?
+          <Text style={styles.hux124}>{props.approvedServices[props.approvedServices.length - 1].odometer} KM</Text> :
+          <Text style={styles.hux124}>No Record</Text>
+        }
+        <Text style={styles.lkr15600}>{props.vehicleData[0].color}</Text>
       </View>
     </View>
   );

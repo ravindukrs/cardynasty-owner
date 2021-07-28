@@ -22,12 +22,12 @@ export default function NotificationComponent(props) {
                 separator={true}
                 inColumn={false}>
                 <CardButton
-                    onPress={() => { props.action.onDeclinePress(props.notification.serviceId)}}
+                    onPress={() => { props.action.onDeclinePress(props.notification.serviceId, props.notification.regNumber)}}
                     title="Decline"
                     color="red"
                 />
                 <CardButton
-                    onPress={() => { props.action.onAcceptPress(props.notification.serviceId)}}
+                    onPress={() => { props.action.onAcceptPress(props.notification.serviceId, props.notification.regNumber)}}
                     title="Accept"
                     color="green"
                 />

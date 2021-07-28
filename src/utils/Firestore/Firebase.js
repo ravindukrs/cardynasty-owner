@@ -1,4 +1,5 @@
 import firestore from '@react-native-firebase/firestore';
+import moment from 'moment';
 
 const Firebase = {
 
@@ -15,6 +16,20 @@ const Firebase = {
             return true;
         }).catch((error) => {
             console.log("Error updating document: ", error);
+        })
+    },
+
+    getUserDetails: (uid, setUserDetails) => {
+        return firestore().collection('users').doc(uid).get().then((doc) => {
+            if (doc.exists) {
+                console.log("User ID: ", uid)
+                setUserDetails(doc.data())
+            } else {
+                // doc.data() will be undefined in this case
+                console.log("No such document!");
+            }
+        }).catch((error) => {
+            console.log("Error getting document:", error);
         })
     },
 
@@ -35,24 +50,36 @@ const Firebase = {
         });
     },
 
-    getPendingServices: (uid, regNumber, setPendingServices) => {
-        return firestore().collection('vehicles').doc(regNumber).collection('services').where("approved", "==", false).onSnapshot((querySnapshot) => {
-            let pendingServices = []
+    getMyVehiclesRegistrations: (uid, setMyVehicles) => {
+        return firestore().collection('vehicles').where("owner", "==", uid).onSnapshot((querySnapshot) => {
+            let vehicles = []
             querySnapshot.forEach((doc) => {
                 if (doc.data()) {
-                    let id = doc.id;
-                    pendingServices.push({id, ...doc.data()});
+                    vehicles.push(doc.data().regNumber);
                 }
             });
-            console.log("Setting Pending Services")
-            console.log(pendingServices)
-            setPendingServices(pendingServices)
-            console.log("Completed Setting")
+            setMyVehicles(vehicles)
         }).catch((error) => {
             console.log("Error querying document: ", error);
             return null
         });
     },
+
+    getPendingServices: async (uid, regNumbers, setPendingServices) => {
+        return firestore().collectionGroup('services').where('approved', '==', false).where('regNumber', 'in', regNumbers).onSnapshot((querySnapshot) => {
+            let pendingServices = []
+            querySnapshot.forEach((doc) => {
+                let id = doc.id
+                pendingServices.push({ id, ...doc.data() })
+            });
+            setPendingServices(pendingServices)
+        }).catch((error) => {
+            console.log("Error querying document: ", error);
+            return null
+        });
+
+    },
+
 
     getApprovedServices: (uid, regNumber, setApprovedServices) => {
         return firestore().collection('vehicles').doc(regNumber).collection('services').where("approved", "==", "accepted").onSnapshot((querySnapshot) => {
@@ -60,7 +87,7 @@ const Firebase = {
             querySnapshot.forEach((doc) => {
                 if (doc.data()) {
                     let id = doc.id;
-                    approvedServices.push({id, ...doc.data()});
+                    approvedServices.push({ id, ...doc.data() });
                 }
             });
             setApprovedServices(approvedServices)
@@ -90,7 +117,28 @@ const Firebase = {
         }).catch((error) => {
             console.log("Error updating document: ", error);
         })
-    }
+    },
+
+    getApprovedServicesAfterDate: (uid, regNumber, setServicesWithDifference) => {
+        return firestore().collection('vehicles').doc(regNumber).collection('services').where("approved", "==", "accepted").onSnapshot((querySnapshot) => {
+            let approvedServices = []
+            querySnapshot.forEach((doc) => {
+
+                if (doc.data()) {
+                    let today = moment()
+                    let serviceDate = moment(doc.data().serviceDate).format("YYYY-MM-DD")
+                    let difference = moment.duration(today.diff(serviceDate)).asDays();
+                    let id = doc.id;
+                    approvedServices.push({ id, ...doc.data(), difference });
+                }
+            });
+            setServicesWithDifference(approvedServices)
+
+        }).catch((error) => {
+            console.log("Error querying document: ", error);
+            return null
+        });
+    },
 
 
 }

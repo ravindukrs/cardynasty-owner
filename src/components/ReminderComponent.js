@@ -6,7 +6,7 @@ import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 
 
 export default function ReminderComponent(props) {
     return (
-        <Card style={{borderRadius:10}} avatarSource={{uri: 'https://cutt.ly/dclKbMJ'}} >
+        <Card style={{borderRadius:10, backgroundColor:"#F2E1C1"}} avatarSource={{uri: 'https://cutt.ly/dclKbMJ'}} >
             {/* <CardImage
                 source={require('../assets/creditcard.png')}
                 title="Your Balance: Rs. 2500.00"
@@ -18,7 +18,7 @@ export default function ReminderComponent(props) {
                 subtitle= {props.reminder.milage}
             />
             <CardContent text={props.reminder.due} />
-            <CardAction
+            {/* <CardAction
                 separator={true}
                 inColumn={false}>
                 <CardButton
@@ -33,7 +33,7 @@ export default function ReminderComponent(props) {
                     color="green"
                 />
 
-            </CardAction>
+            </CardAction> */}
         </Card>
     )
 }
