@@ -12,6 +12,14 @@ export default function Routes() {
     const [initializing, setInitializing] = useState(true);
     // Handle user state changes
     function onAuthStateChanged(user) {
+      console.log("onAuthStateChange ",user)
+      authenticateUser(user)
+      // setUser(user);
+      // if (initializing) setInitializing(false);
+      // setLoading(false);
+    }
+
+    function authenticateUser(user){
       setUser(user);
       if (initializing) setInitializing(false);
       setLoading(false);

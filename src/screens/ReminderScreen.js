@@ -61,7 +61,7 @@ export default function ReminderScreen({ navigation }) {
     useEffect(() => {
         (async () => {
             let vehicleLabelArray = []
-            if (myVehicles) {
+            if (myVehicles && myVehicles.length>0) {
                 myVehicles.forEach((vehicle) => {
                     vehicleLabelArray.push({
                         label: `${vehicle.regNumber} - ${vehicle.make} ${vehicle.model} ${vehicle.manufactureYear}`,

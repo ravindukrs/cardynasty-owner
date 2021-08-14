@@ -5,6 +5,7 @@ import Firebase from '../utils/Firestore/Firebase';
 import { Input, Button, ListItem, Icon } from 'react-native-elements';
 import VehicleInfoBlackBar from '../components/VehicleInfoBlackBar';
 import moment from 'moment';
+import { FloatingAction } from "react-native-floating-action";
 
 
 
@@ -20,6 +21,18 @@ export default function HistoryScreen({ navigation }) {
     const [vehicleData, setVehicleData] = useState(null)
     const [lastService, setLastService] = useState(null)
     const [list, setList] = useState(null)
+    const actions = [
+        {
+            text: "Sign Out",
+            icon: <Icon
+                name="arrow-right"
+                size={15}
+                color="white"
+            />,
+            name: "Sign Out",
+            position: 1
+        }
+    ];
 
 
     const handleNext = () => {
@@ -258,8 +271,18 @@ export default function HistoryScreen({ navigation }) {
                     </View>
 
                 }
+         
 
             </ScrollView>
+            <FloatingAction
+                        actions={actions}
+                        color="purple"
+                        onPressItem={name => {
+                            console.log(`selected button: ${name}`);
+                            logout()
+                        }}
+                    />
+         
         </View>
     );
 }

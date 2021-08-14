@@ -14,7 +14,7 @@ export default function NotificationComponent(props) {
                 style={{borderRadius:10, backgroundColor: "white"}}
             /> */}
             <CardTitle
-                title = {props.notification.type}
+                title = {`${props.notification.type} - ${props.notification.regNumber}`}
                 subtitle= {props.notification.description}
             />
             <CardContent text={props.notification.workdone} />

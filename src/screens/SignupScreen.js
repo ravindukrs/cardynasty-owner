@@ -24,11 +24,13 @@ import { Input } from 'react-native-elements';
 
 import bgImg from '../assets/bgImg.png';
 
+
 //Import Yup
 import * as Yup from 'yup';
 
 //Import Formik
 import { Formik } from 'formik';
+import { Alert } from 'react-native';
 
 const validationSchema = Yup.object().shape({
     fName: Yup.string()
@@ -68,16 +70,32 @@ export default function SignupScreen() {
 
         const { fName, lName, email, mobile, nic, password } = values;
 
+        //Check if NIC or Mobile exist
+        let newNic = await Firebase.checkNIC(nic)
+        let newMobile = await Firebase.checkMobile(mobile)
+
+        if(!newNic){
+            Alert.alert("NIC in Use", "This NIC is already associated with an account")
+            return;
+        }
+        if(!newMobile){
+            Alert.alert("Mobile Number in Use", "This Mobile Number is already associated with an account")
+            return;
+        }
         try {
             const response = await register(email,password);
 
             if (response.user.uid){
                 const {uid} = response.user;
-                await Firebase.createNewUser({uid, fName, lName, email, nic, mobile });
+                let signUpResponse = await Firebase.createNewUser({uid, fName, lName, email, nic, mobile, userType: "Owner" });
+                console.log(signUpResponse)
+                if(signUpResponse.includes("Error")){
+                    Alert.alert("Error Occured", signUpResponse.replace(/\s*\(.*?\)\s*/g, ''))
+                }
             }
         }catch(error){
-            console.log("No success")
             console.log(error.message)
+            // Alert.alert("Error Occured", str.replace(/\s*\(.*?\)\s*/g, '')
         }
 
     }

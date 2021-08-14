@@ -38,7 +38,14 @@ export default function MyVehicleScreen({ navigation }) {
         })()
     }, [user])
 
-
+    const removeVehicle = async (regNumber) => {
+        try {
+            await Firebase.removeVehicleOwnership(regNumber);
+            return true
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
     return (
         <View style={styles.container}>
@@ -51,7 +58,7 @@ export default function MyVehicleScreen({ navigation }) {
                 {myVehicles ? (
                    myVehicles.map(vehicle => {
                        return(
-                        <MyCarComponent key={vehicle.vin} vehicle={{ make: vehicle.make, model: vehicle.model, regNumber: vehicle.regNumber }} navigation={navigation} />
+                        <MyCarComponent key={vehicle.vin} vehicle={{ make: vehicle.make, model: vehicle.model, regNumber: vehicle.regNumber, manufactureYear: vehicle.manufactureYear }} navigation={navigation} removeVehicle={removeVehicle} />
                        )
                     })
                     
@@ -69,11 +76,7 @@ export default function MyVehicleScreen({ navigation }) {
                     onPress={() => navigation.navigate('AddVehicle')}
 
                 />
-                {/* <ProgressChartComponent/>
-                <Text style={{ textAlign: 'center', fontSize: 18 }}>Your Week's Earnings</Text>
-                <LineChartComponent />
-                <Text style={{ textAlign: 'center', fontSize: 18 }}>Service Breakdown</Text>
-                <PieChartComponent /> */}
+
             </ScrollView>
         </View>
     );

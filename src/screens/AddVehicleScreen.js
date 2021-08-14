@@ -47,7 +47,7 @@ export default function AddVehicleScreen({ navigation }) {
             model
         });
         if (result) {
-            successAlert("Your service record was added.", null);
+            successAlert("Your Vehicle record was added.", null);
         } else {
             successAlert(null, "Error Occured")
         }

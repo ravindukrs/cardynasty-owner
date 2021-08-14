@@ -28,7 +28,7 @@ function Home() {
                 inactiveTintColor: 'gray',
             }}
         >
-            <Tab.Screen 
+            {/* <Tab.Screen 
                 name="Dashboard" 
                 component={HomeScreen} 
                 options={{
@@ -40,7 +40,7 @@ function Home() {
                             color={color} />
                     ),
                 }}
-            />
+            /> */}
             <Tab.Screen 
                 name="My Vehicles" 
                 component={VehicleOwnershipStack}

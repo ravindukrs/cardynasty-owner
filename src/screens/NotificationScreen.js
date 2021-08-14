@@ -80,8 +80,10 @@ export default function NotificationScreen({navigation}) {
 
     return (
         <View style={styles.container}>
+           
             <ScrollView contentContainerStyle={{ justifyContent: "center", alignItems: "center", width: "100%" }}>
                 <Text style={{ textAlign: 'center', fontSize: 18 }}>Pending Approvals</Text>
+                
                 {pendingServices && serviceList ? (
                  pendingServices.map(service => {
                     console.log("Service ID: ", service.id)
@@ -120,6 +122,7 @@ export default function NotificationScreen({navigation}) {
                     )
                  })
                 ): null}
+                
             </ScrollView>
         </View>
     );

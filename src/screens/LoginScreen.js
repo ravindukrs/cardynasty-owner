@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, ImageBackground } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, ImageBackground, Alert } from 'react-native';
 import FormButton from '../components/FormButton';
 import { AuthContext } from '../navigation/AuthProvider';
 import { windowHeight, windowWidth } from '../utils/Dimensions';
@@ -8,7 +8,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import { Input } from 'react-native-elements';
 
 import bgImg from '../assets/bgImg.png';
-
+import Firebase from '../utils/Firestore/Firebase';
 //Import Yup
 import * as Yup from 'yup';
 
@@ -27,11 +27,44 @@ const validationSchema = Yup.object().shape({
 })
 
 export default function LoginScreen({ navigation }) {
-    const { login } = useContext(AuthContext);
+    const { login, reset } = useContext(AuthContext);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPass, setShowPass] = useState(false);
 
+    const performLogin = async (email, password) => {
+        let userData = await Firebase.getUserByEmail(email)
+        if(userData && userData.userType == "Owner"){
+            console.log("Performing Login")
+            const response = await login(email, password)
+            if(!response.user){
+                Alert.alert("Invalid Login", `Sorry, your entered invalid credentials.`)
+            }
+        }else{
+            console.log("Didn't Login")
+            Alert.alert("Invalid Role", "The email is not associated with Owner privilages.")
+        }
+        
+    }
+
+    const performResetPassword = async (email) => {
+        let emailregex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        let emailValidity =  await emailregex.test(email);
+        if(!emailValidity){
+            Alert.alert("Invalid Email","The email address entered is invalid")
+            return;
+        }
+        let userData = await Firebase.getUserByEmail(email)
+        if(userData && userData.userType == "Owner"){
+            console.log("Performing Reset")
+            const response = await reset(email)
+            console.log("Reset Response ",response)
+            Alert.alert("Recovery link sent", `Password reset information was sent to ${email}`)
+        }else{
+            Alert.alert("Invalid Role", "The email is not associated with Owner privilages.")
+        }
+        
+    }
     return (
 
         <KeyboardAvoidingView
@@ -70,6 +103,7 @@ export default function LoginScreen({ navigation }) {
                                         placeholderTextColor="white"
                                         errorMessage={touched.email && errors.email?errors.email:null}
                                         errorStyle={styles.errorText}
+                                        style={{color:"white"}}
                                     />
 
                                     <Input
@@ -96,11 +130,12 @@ export default function LoginScreen({ navigation }) {
                                         value={values.password}
                                         errorMessage={touched.password && errors.password?errors.password:null}
                                         errorStyle={styles.errorText}
+                                        style={{color:"white"}}
                                     />
                                     { isValid &&
                                         <FormButton
                                             buttonTitle='Login'
-                                            onPress={() => login(values.email, values.password)}
+                                            onPress={() => performLogin(values.email, values.password)}
                                         />
                                     }
 
@@ -109,6 +144,13 @@ export default function LoginScreen({ navigation }) {
                                         onPress={() => navigation.navigate('Signup')}
                                     >
                                         <Text style={styles.signUpText}>New user? Join here</Text>
+                                    </TouchableOpacity>
+
+                                    <TouchableOpacity
+                                        style={styles.navButton}
+                                        onPress={() => performResetPassword(values.email)}
+                                    >
+                                        <Text style={styles.signUpText}>Forgot Password. Reset Here</Text>
                                     </TouchableOpacity>
                                 </View>
                             )}

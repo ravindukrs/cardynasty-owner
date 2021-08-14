@@ -5,6 +5,39 @@ import { Card, CardTitle, CardContent, CardAction, CardButton, CardImage } from 
 //import bgImg from '../assets/creditcard.png';
 
 export default function MyCarComponent(props) {
+    const handleRemoveVehicle = async (vehicleReg) => {
+        let removed = await props.removeVehicle(vehicleReg)
+        if(removed){
+            Alert.alert(
+                "Successfully Removed",
+                `Vehicle ${vehicleReg} was removed successfully`,
+                [
+                  { text: "Ok", style: "ok"}
+                ]
+              );
+        }else{
+            Alert.alert(
+                "Sorry, error occured",
+                `Please try again`,
+                [
+                  { text: "Ok", style: "ok"}
+                ]
+              );
+        }
+    }
+
+    const createConfirmationDialog = (vehicleReg) =>
+    Alert.alert(
+      "Are you sure?",
+      `You requested to remove vehicle ${vehicleReg}`,
+      [
+        {
+          text: "Cancel",
+          style: "cancel"
+        },
+        { text: "Yes", onPress: () => {handleRemoveVehicle(vehicleReg)}}
+      ]
+    );
     return (
         <Card style={{borderRadius:10}} avatarSource={{uri: 'https://cutt.ly/dclKbMJ'}} >
             {/* <CardImage
@@ -14,8 +47,8 @@ export default function MyCarComponent(props) {
                 style={{borderRadius:10, backgroundColor: "white"}}
             /> */}
             <CardTitle
-                title = {props.vehicle.make}
-                subtitle= {props.vehicle.model}
+                title = {`${props.vehicle.make} ${props.vehicle.model} ${props.vehicle.manufactureYear}`}
+                subtitle= {props.vehicle.regNumber}
             />
             {/* <CardContent text="No upcomming reminders" /> */}
             <CardAction
@@ -33,7 +66,7 @@ export default function MyCarComponent(props) {
                     color="#FEB557"
                 />
                 <CardButton
-                    onPress={() => {}}
+                    onPress={() => {createConfirmationDialog(props.vehicle.regNumber)}}
                     title="Remove"
                     color="#FEB557"
                 />
